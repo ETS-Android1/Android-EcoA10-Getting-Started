@@ -3,6 +3,7 @@ package com.ecopaynet.ecoa10_gettingstarted;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +21,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR;
+
 public class PerformTransactionActivity extends AppCompatActivity
     implements Events.Transaction
 {
@@ -27,6 +32,8 @@ public class PerformTransactionActivity extends AppCompatActivity
 
     SharedPreferences sharedPreferences;
     String sharedPreferencesKey = "com.ecopaynet.ecoa10_gettingstarted_preferences";
+
+    int startingOrientation = Configuration.ORIENTATION_UNDEFINED;
 
     static final int REQUEST_SIGNATURE = 1;
 
@@ -42,62 +49,92 @@ public class PerformTransactionActivity extends AppCompatActivity
 
             deviceMessagesTextView = (TextView) findViewById(R.id.deviceMessagesTextView);
 
-            Intent intent = getIntent();
-            switch (intent.getStringExtra("TRANSACTION_TYPE"))
+            if (savedInstanceState == null)
             {
-                case "SALE":
-                {
-                    BigInteger amount = new BigInteger(intent.getStringExtra("AMOUNT"));
-                    if(EcoA10.sale(amount, this))
-                    {
-                        //ok
-                    }
-                    else
-                    {
-                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-                        alertDialogBuilder.setTitle("Unable to perform sale");
-                        alertDialogBuilder.setMessage("Incorrect parameters");
-                        alertDialogBuilder.setPositiveButton("OK", null);
-                        alertDialogBuilder.show();
+                this.startingOrientation = this.getResources().getConfiguration().orientation;
 
+                Intent intent = getIntent();
+                switch (intent.getStringExtra("TRANSACTION_TYPE"))
+                {
+                    case "SALE":
+                    {
+                        BigInteger amount = new BigInteger(intent.getStringExtra("AMOUNT"));
+                        if (EcoA10.sale(amount, this))
+                        {
+                            //ok
+                        }
+                        else
+                        {
+                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+                            alertDialogBuilder.setTitle("Unable to perform sale");
+                            alertDialogBuilder.setMessage("Incorrect parameters");
+                            alertDialogBuilder.setPositiveButton("OK", null);
+                            alertDialogBuilder.show();
+
+                            finish();
+                        }
+                    }
+                    break;
+                    case "REFUND":
+                    {
+                        BigInteger amount = new BigInteger(intent.getStringExtra("AMOUNT"));
+                        String authorizationCode = intent.getStringExtra("AUTHORIZATION_CODE");
+                        String operationNumber = intent.getStringExtra("OPERATION_NUMBER");
+                        Date saleDate = new SimpleDateFormat("ddMMyyyy", Locale.US).parse(intent.getStringExtra("SALE_DATE"));
+
+                        if (EcoA10.refund(amount, operationNumber, authorizationCode, saleDate, this))
+                        {
+                            //ok
+                        }
+                        else
+                        {
+                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+                            alertDialogBuilder.setTitle("Unable to perform refund");
+                            alertDialogBuilder.setMessage("Incorrect parameters");
+                            alertDialogBuilder.setPositiveButton("OK", null);
+                            alertDialogBuilder.show();
+
+                            finish();
+                        }
+                    }
+                    break;
+                    default:
+                    {
                         finish();
                     }
+                    break;
                 }
-                break;
-                case "REFUND":
+            }
+            else
+            {
+                this.startingOrientation = savedInstanceState.getInt("STARTING_ORIENTATION", SCREEN_ORIENTATION_SENSOR);
+                if(this.startingOrientation != this.getResources().getConfiguration().orientation)
                 {
-                    BigInteger amount = new BigInteger(intent.getStringExtra("AMOUNT"));
-                    String authorizationCode = intent.getStringExtra("AUTHORIZATION_CODE");
-                    String operationNumber = intent.getStringExtra("OPERATION_NUMBER");
-                    Date saleDate = new SimpleDateFormat("ddMMyyyy", Locale.US).parse(intent.getStringExtra("SALE_DATE"));
-
-                    if(EcoA10.refund(amount, operationNumber, authorizationCode, saleDate, this))
+                    switch (this.startingOrientation)
                     {
-                        //ok
-                    }
-                    else
-                    {
-                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-                        alertDialogBuilder.setTitle("Unable to perform refund");
-                        alertDialogBuilder.setMessage("Incorrect parameters");
-                        alertDialogBuilder.setPositiveButton("OK", null);
-                        alertDialogBuilder.show();
-
-                        finish();
+                        case Configuration.ORIENTATION_LANDSCAPE:
+                            setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+                            break;
+                        case Configuration.ORIENTATION_PORTRAIT:
+                            setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
+                            break;
+                        default:
+                            setRequestedOrientation(SCREEN_ORIENTATION_SENSOR);
+                            break;
                     }
                 }
-                break;
-                default:
-                {
-                    finish();
-                }
-                break;
             }
         }
         catch (Exception ex)
         {
             finish();
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState (Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("STARTING_ORIENTATION", this.startingOrientation);
     }
 
     @Override

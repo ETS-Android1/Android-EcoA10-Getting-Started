@@ -253,7 +253,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void run()
             {
-                progressDialog.hide();
+                progressDialog.dismiss();
                 setPhase3Buttons();
                 setDeviceInformation();
             }
@@ -268,7 +268,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void run()
             {
-                progressDialog.hide();
+                progressDialog.dismiss();
 
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
                 alertDialogBuilder.setTitle("Initialization error:");
