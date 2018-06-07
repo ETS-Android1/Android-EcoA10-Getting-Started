@@ -197,4 +197,26 @@ public class PerformTransactionActivity extends AppCompatActivity
             }
         });
     }
+
+    @Override
+    public void onTransactionDisplayDCCMessage(final String s)
+    {
+        runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                // setup the alert builder
+                AlertDialog.Builder builder = new AlertDialog.Builder(PerformTransactionActivity.this);
+                builder.setMessage(s);
+
+                // add the buttons
+                builder.setPositiveButton("OK", null);
+
+                // create and show the alert dialog
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        });
+    }
 }

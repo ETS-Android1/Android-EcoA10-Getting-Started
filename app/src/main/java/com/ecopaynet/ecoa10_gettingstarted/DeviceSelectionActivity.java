@@ -33,7 +33,7 @@ public class DeviceSelectionActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_selection);
 
-        devicesListView = (ListView) findViewById( R.id.availableDevicesListView);
+        devicesListView = findViewById( R.id.availableDevicesListView);
         devicesListView.setOnItemClickListener(this);
 
         this.progressDialog = ProgressDialog.show(this, "Loading Devices", "Please wait...");
