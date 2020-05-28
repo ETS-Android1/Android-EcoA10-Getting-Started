@@ -1,1 +1,1 @@
-include ':app', ':com.ecopaynet.ecoa10'
+include ':app'

@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -13,6 +13,7 @@ import android.widget.ListView;
 import com.ecopaynet.ecoa10.Device;
 import com.ecopaynet.ecoa10.DeviceBluetooth;
 import com.ecopaynet.ecoa10.DeviceSerial;
+import com.ecopaynet.ecoa10.DeviceTcpip;
 import com.ecopaynet.ecoa10.EcoA10;
 import com.ecopaynet.ecoa10_gettingstarted.R;
 
@@ -33,7 +34,7 @@ public class DeviceSelectionActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_selection);
 
-        devicesListView = findViewById( R.id.availableDevicesListView);
+        devicesListView = (ListView) findViewById( R.id.availableDevicesListView);
         devicesListView.setOnItemClickListener(this);
 
         this.progressDialog = ProgressDialog.show(this, "Loading Devices", "Please wait...");
@@ -46,6 +47,9 @@ public class DeviceSelectionActivity extends AppCompatActivity
     private void loadDevices()
     {
         this.availableDevicesList = new ArrayList<>();
+
+        //Force add tcpip device
+        this.availableDevicesList.add(new DeviceTcpip("Local Device", "127.0.0.1", 5556));
 
         //Force add serial device
         this.availableDevicesList.add(new DeviceSerial());
@@ -75,6 +79,11 @@ public class DeviceSelectionActivity extends AppCompatActivity
                         deviceName = "Serial Port Device";
                     }
                     break;
+                case TCPIP:
+                {
+                    deviceName = device.getName();
+                }
+                break;
             }
             deviceNamesList.add(deviceName);
         }
@@ -93,10 +102,26 @@ public class DeviceSelectionActivity extends AppCompatActivity
 
             Intent intent=new Intent();
             intent.putExtra("DEVICE_TYPE", selectedDevice.getType().toString());
-            if(selectedDevice.getType() == Device.Type.BLUETOOTH)
+            switch (selectedDevice.getType())
             {
-                intent.putExtra("DEVICE_NAME", selectedDevice.getName());
-                intent.putExtra("DEVICE_ADDRESS", ((DeviceBluetooth)selectedDevice).getAddress());
+                case BLUETOOTH:
+                {
+                    intent.putExtra("DEVICE_NAME", selectedDevice.getName());
+                    intent.putExtra("DEVICE_ADDRESS", ((DeviceBluetooth)selectedDevice).getAddress());
+                }
+                break;
+                case SERIAL:
+                {
+                    //
+                }
+                break;
+                case TCPIP:
+                {
+                    intent.putExtra("DEVICE_NAME", selectedDevice.getName());
+                    intent.putExtra("DEVICE_IP_ADDRESS", ((DeviceTcpip)selectedDevice).getIpAddress());
+                    intent.putExtra("DEVICE_PORT", ((DeviceTcpip)selectedDevice).getPort());
+                }
+                break;
             }
             setResult(Activity.RESULT_OK, intent);
             finish();

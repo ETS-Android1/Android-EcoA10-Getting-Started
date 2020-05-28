@@ -1,11 +1,11 @@
 package com.ecopaynet.ecoa10_gettingstarted;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -16,7 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class RefundActivity extends AppCompatActivity
+public class RefundActivity extends Activity
     implements View.OnClickListener
 {
     private DatePickerDialog datePickerDialog;

@@ -8,9 +8,9 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.ecopaynet.ecoa10.Device;
 import com.ecopaynet.ecoa10.DeviceBluetooth;
 import com.ecopaynet.ecoa10.DeviceSerial;
+import com.ecopaynet.ecoa10.DeviceTcpip;
 import com.ecopaynet.ecoa10.EcoA10;
 import com.ecopaynet.ecoa10.Environment;
 import com.ecopaynet.ecoa10.Error;
@@ -168,11 +169,16 @@ public class MainActivity extends AppCompatActivity
         String deviceType = intentData.getStringExtra("DEVICE_TYPE");
 
         editor.putString("DEVICE_TYPE", deviceType);
-
         if(deviceType.equals("BLUETOOTH"))
         {
             editor.putString("DEVICE_NAME", intentData.getStringExtra("DEVICE_NAME"));
             editor.putString("DEVICE_ADDRESS", intentData.getStringExtra("DEVICE_ADDRESS"));
+        }
+        else if(deviceType.equals("TCPIP"))
+        {
+            editor.putString("DEVICE_NAME", intentData.getStringExtra("DEVICE_NAME"));
+            editor.putString("DEVICE_IP_ADDRESS", intentData.getStringExtra("DEVICE_IP_ADDRESS"));
+            editor.putInt("DEVICE_PORT", intentData.getIntExtra("DEVICE_PORT", 0));
         }
         editor.apply();
     }
@@ -199,6 +205,19 @@ public class MainActivity extends AppCompatActivity
                 this.selectedDevice = new DeviceSerial();
                 selectedDeviceInfoTextView.setText("Device: Serial Port");
                 this.setPhase2Buttons();
+            }
+            break;
+            case "TCPIP":
+            {
+                String deviceName = this.sharedPreferences.getString("DEVICE_NAME", "");
+                String deviceIpAddress = this.sharedPreferences.getString("DEVICE_IP_ADDRESS", "");
+                int devicePort = this.sharedPreferences.getInt("DEVICE_PORT", 0);
+                if(deviceName.length() > 0 && deviceIpAddress.length() > 0 && devicePort > 0)
+                {
+                    this.selectedDevice = new DeviceTcpip(deviceName, deviceIpAddress, devicePort);
+                    selectedDeviceInfoTextView.setText("Device: " + this.selectedDevice.getName());
+                    this.setPhase2Buttons();
+                }
             }
             break;
         }

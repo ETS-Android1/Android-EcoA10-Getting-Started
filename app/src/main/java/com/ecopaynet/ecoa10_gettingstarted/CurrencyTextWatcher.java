@@ -5,6 +5,7 @@ import android.text.TextWatcher;
 import android.widget.EditText;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 
 public class CurrencyTextWatcher implements TextWatcher {
 
@@ -56,7 +57,9 @@ public class CurrencyTextWatcher implements TextWatcher {
                 v_value = Double.parseDouble(v_text);
             }
             // Currency instance may be retrieved from a static member.
-            DecimalFormat decimalFormat = new DecimalFormat("0.00 EUR");
+            DecimalFormatSymbols decimalSeparator = new DecimalFormatSymbols();
+            decimalSeparator.setDecimalSeparator(',');
+            DecimalFormat decimalFormat = new DecimalFormat("0.00 EUR", decimalSeparator);
             String v_formattedValue = decimalFormat.format((v_value/100));
             current = v_formattedValue;
             currency.setText(v_formattedValue);
