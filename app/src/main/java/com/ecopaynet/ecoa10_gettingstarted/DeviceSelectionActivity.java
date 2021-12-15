@@ -4,18 +4,18 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.ecopaynet.ecoa10.Device;
-import com.ecopaynet.ecoa10.DeviceBluetooth;
-import com.ecopaynet.ecoa10.DeviceSerial;
-import com.ecopaynet.ecoa10.DeviceTcpip;
-import com.ecopaynet.ecoa10.EcoA10;
-import com.ecopaynet.ecoa10_gettingstarted.R;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.ecopaynet.module.paymentpos.Device;
+import com.ecopaynet.module.paymentpos.DeviceBluetooth;
+import com.ecopaynet.module.paymentpos.DeviceSerial;
+import com.ecopaynet.module.paymentpos.DeviceTcpip;
+import com.ecopaynet.module.paymentpos.PaymentPOS;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +55,7 @@ public class DeviceSelectionActivity extends AppCompatActivity
         this.availableDevicesList.add(new DeviceSerial());
 
         //Load bluetooth devices
-        this.availableDevicesList.addAll(EcoA10.getBluetoothPairedDevices());
+        this.availableDevicesList.addAll(PaymentPOS.getBluetoothPairedDevices());
 
     }
 

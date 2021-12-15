@@ -8,25 +8,26 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.core.app.ActivityCompat;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.ecopaynet.ecoa10.Device;
-import com.ecopaynet.ecoa10.DeviceBluetooth;
-import com.ecopaynet.ecoa10.DeviceSerial;
-import com.ecopaynet.ecoa10.DeviceTcpip;
-import com.ecopaynet.ecoa10.EcoA10;
-import com.ecopaynet.ecoa10.Environment;
-import com.ecopaynet.ecoa10.Error;
-import com.ecopaynet.ecoa10.Events;
-import com.ecopaynet.ecoa10.Information;
-import com.ecopaynet.ecoa10.LogLevel;
-import com.ecopaynet.ecoa10.Status;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
+import com.ecopaynet.module.paymentpos.Device;
+import com.ecopaynet.module.paymentpos.DeviceBluetooth;
+import com.ecopaynet.module.paymentpos.DeviceSerial;
+import com.ecopaynet.module.paymentpos.DeviceTcpip;
+import com.ecopaynet.module.paymentpos.Environment;
+import com.ecopaynet.module.paymentpos.Error;
+import com.ecopaynet.module.paymentpos.Events;
+import com.ecopaynet.module.paymentpos.Information;
+import com.ecopaynet.module.paymentpos.LibraryStatus;
+import com.ecopaynet.module.paymentpos.LogLevel;
+import com.ecopaynet.module.paymentpos.PaymentPOS;
 
 public class MainActivity extends AppCompatActivity
     implements Events.Initialization,
@@ -59,13 +60,12 @@ public class MainActivity extends AppCompatActivity
 
         sharedPreferences = this.getSharedPreferences(sharedPreferencesKey, Context.MODE_PRIVATE);
 
-        if (savedInstanceState == null)
-        {
-            EcoA10.addLogEventHandler(this);
+        if (savedInstanceState == null) {
+            PaymentPOS.addLogEventHandler(this);
         }
 
         TextView libraryVersionTextView = (TextView) findViewById(R.id.libraryVersionTextView);
-        libraryVersionTextView.setText("ECOA10 Library v" + EcoA10.getLibraryVersion());
+        libraryVersionTextView.setText("PaymentPOS Library v" + PaymentPOS.getLibraryVersion());
 
         selectedDeviceInfoTextView = (TextView) findViewById(R.id.selectedDeviceInfoTextView);
 
@@ -89,8 +89,8 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View v)
             {
                 progressDialog = ProgressDialog.show(MainActivity.this, "Initializing Device", "Please wait...");
-                EcoA10.setEnvironment(Environment.TEST);
-                EcoA10.initialize(selectedDevice, MainActivity.this, MainActivity.this);
+                PaymentPOS.setEnvironment(Environment.TEST);
+                PaymentPOS.initialize(selectedDevice, MainActivity.this);
             }
         });
 
@@ -120,9 +120,8 @@ public class MainActivity extends AppCompatActivity
         terminateButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
-            public void onClick(View v)
-            {
-                EcoA10.terminate();
+            public void onClick(View v) {
+                PaymentPOS.terminate();
                 setPhase2Buttons();
                 deviceInformationTextView.setText("");
             }
@@ -137,8 +136,7 @@ public class MainActivity extends AppCompatActivity
     {
         super.onRestoreInstanceState(savedInstanceState);
 
-        if(EcoA10.getStatus() == Status.READY)
-        {
+        if (PaymentPOS.getLibraryStatus() == LibraryStatus.READY) {
             setPhase3Buttons();
             setDeviceInformation();
         }
@@ -148,12 +146,9 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
-        switch(requestCode)
-        {
-            case DEVICE_SELECTION_REQUEST_CODE:
-            {
-                if(resultCode == RESULT_OK)
-                {
+        switch (requestCode) {
+            case DEVICE_SELECTION_REQUEST_CODE: {
+                if (resultCode == RESULT_OK) {
                     this.saveSelectedDevice(data);
                     this.loadSavedDevice();
                 }
@@ -250,16 +245,15 @@ public class MainActivity extends AppCompatActivity
         this.terminateButton.setEnabled(true);
     }
 
-    private void setDeviceInformation()
-    {
-        Information information = EcoA10.getInformation();
+    private void setDeviceInformation() {
+        Information information = PaymentPOS.getInformation();
 
         String deviceInformation = "";
-        deviceInformation += "Environment: " + information.environment + "\r\n";
-        deviceInformation += "Commerce name: " + information.commerceName + "\r\n";
-        deviceInformation += "Commerce address: " + information.commerceAddress + "\r\n";
-        deviceInformation += "Commerce number: " + information.commerceNumber + "\r\n";
-        deviceInformation += "Currency: " + information.commerceCurrency.getAlpha() + "\r\n";
+        deviceInformation += "Environment: " + information.getEnvironment() + "\r\n";
+        deviceInformation += "Commerce name: " + information.getCommerceName() + "\r\n";
+        deviceInformation += "Commerce address: " + information.getCommerceAddress() + "\r\n";
+        deviceInformation += "Commerce number: " + information.getCommerceNumber() + "\r\n";
+        deviceInformation += "Currency: " + information.getCommerceCurrency().getAlpha() + "\r\n";
 
         deviceInformationTextView.setText(deviceInformation);
     }

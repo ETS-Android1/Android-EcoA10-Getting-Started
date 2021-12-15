@@ -1,34 +1,39 @@
-# DEPRECATED This is no longer supported, please consider using [PaymentPOS](https://github.com/ecopaynet/paymentpos-android) instead.
+# Instructions to migrate EcoA10 library to PaymentPOS module
 
-## Android EcoA10 Getting Started
-An Android sample project to test the [EcoA10 library](https://github.com/ecopaynet/ecoa10-library-android).
+1. Replace the EcoA10 AAR file module with the PaymentPOS AAR file.
+2. Application build.gradle changes:
+    - minSdkVersion needs to be 16 or greater.
+    - Add "multiDexEnabled true" inside defaultConfig.
+    - Add "coreLibraryDesugaringEnabled true" inside compileOptions.
+    - Add dependencies (use most recent versions):
+        - implementation "org.jetbrains.kotlinx:kotlinx-datetime:0.0.0"
+        - implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.0.0"
+        - implementation "io.ktor:ktor-client-android:0.0.0"
+        - implementation "io.ktor:ktor-client-serialization:0.0.0"
+        - coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:0.0.0"
+3. Sync project with gradle files.
+4. Replace all imports from "com.ecopaynet.ecoa10.\*" to "com.ecopaynet.module.paymentpos.\*".
+5. Replace this related usages:
+    1. From "com.ecopaynet.ecoa10.EcoA10" to "com.ecopaynet.module.paymentpos.PaymentPOS"
+    2. From "com.ecopaynet.module.paymentpos.Status" to "com.ecopaynet.module.paymentpos.LibraryStatus"
+    3. From "com.ecopaynet.module.paymentpos.EcoA10.getStatus()" to "com.ecopaynet.module.paymentpos.PaymentPOS.getLibraryStatus()"
+6. Some classes have changed their proprety accessors from "myField" to "getMyField(). Change the way these properties are accessed.
+7. Other specific changes:
+    - PaymentPOS.initialize()
+        - No longer needs to "Context".
+    - PaymentPOS.sale(), refund(), etc.
+        - Amount changed to "Long".
+        - TransactionDate changed to "kotlinx.datetime.LocalDate".
+    - PaymentPOS.resetConfiguration()
+        - No longer needs to "Context".
+    - PaymentPOS.generateTransactionTicketsBMP()
+        - Needs a second parameter with a header Bitmap. Can be null.
+        - Returns a list of "Bitmap" instead of an array.
+    - PaymentPOS.generateTransactionTicketsPDF()
+        - Needs a second parameter with a header Bitmap. Can be null.
+        - Returns a list of "PdfDocument" instead of an array.
+    - TransactionResult:
+        - signatureBitmap changed to byte[]
+    - SignatureView:
+        - getSignatureBitmap() changed return to byte[]
 
-## Introduction
-EcoA10 Library (EcoA10) permits the intercomunication between the applications and the payment terminal served by Ecopaynet. Fast, easy and powerful.
-
-The developer of the Android application only needs to worry about the amount of the transaction, the rest of the work is made by the EcoA10.
-
-EcoA10 communicates with Bluetooth and Serial Port payment terminals. This terminals are robust and secure, certified to make card payments using the following input methodes: contactless, NFC, chip, magnetic stripe and manual input.
-
-Integrated on the Android project, the EcoA10 generates this most important entry points:
- - Initialization of EcoA10
- - Sale transaction
- - Refund transaction
- - Ticket generation (PDF, Image, Text)
-
-## Prerequisites
-EcoA10 needs the next prerequisites to work:
- - Android minimum SDK version 15 (4.0.3 Ice Cream Sandwich).
- - Internet connectivity (GPRS, Wifi, Ethernet...).
- - Bluetooth capabilities (if communicate with bluetooth terminals is needed).
- - USB Host port (if communicate with serial port terminals is needed). USB OTG dongle also can be used.
-
-EcoA10 and the "Getting Started" project are made with Android Studio.
-
-## Getting Started project
-This project is made to demonstrate the simplicity of the EcoA10 library integration onto your Android project. There are some other functions to complete a full working demostration of the EcoA10.
-
-To really show this project working, you need our payment terminal. You can ask for one test terminal contacting us: info@ecopaynet.com
-
-## License
-EcoA10 is copyright of Ecopaynet SL

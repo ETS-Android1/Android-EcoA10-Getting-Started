@@ -1,29 +1,29 @@
 package com.ecopaynet.ecoa10_gettingstarted;
 
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import android.widget.TextView;
 
-import com.ecopaynet.ecoa10.BitmapSerializable;
-import com.ecopaynet.ecoa10.EcoA10;
-import com.ecopaynet.ecoa10.Error;
-import com.ecopaynet.ecoa10.Events;
-import com.ecopaynet.ecoa10.TransactionRequestSignatureInformation;
-import com.ecopaynet.ecoa10.TransactionResult;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
-import java.math.BigInteger;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import com.ecopaynet.module.paymentpos.Error;
+import com.ecopaynet.module.paymentpos.Events;
+import com.ecopaynet.module.paymentpos.PaymentPOS;
+import com.ecopaynet.module.paymentpos.TransactionRequestSignatureInformation;
+import com.ecopaynet.module.paymentpos.TransactionResult;
 
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+import kotlinx.serialization.json.Json;
 
 public class PerformTransactionActivity extends AppCompatActivity
     implements Events.Transaction
@@ -54,13 +54,10 @@ public class PerformTransactionActivity extends AppCompatActivity
                 this.startingOrientation = this.getResources().getConfiguration().orientation;
 
                 Intent intent = getIntent();
-                switch (intent.getStringExtra("TRANSACTION_TYPE"))
-                {
-                    case "SALE":
-                    {
-                        BigInteger amount = new BigInteger(intent.getStringExtra("AMOUNT"));
-                        if (EcoA10.sale(amount, this))
-                        {
+                switch (intent.getStringExtra("TRANSACTION_TYPE")) {
+                    case "SALE": {
+                        Long amount = Long.parseLong(intent.getStringExtra("AMOUNT"));
+                        if (PaymentPOS.sale(amount, this)) {
                             //ok
                         }
                         else
@@ -75,15 +72,13 @@ public class PerformTransactionActivity extends AppCompatActivity
                         }
                     }
                     break;
-                    case "REFUND":
-                    {
-                        BigInteger amount = new BigInteger(intent.getStringExtra("AMOUNT"));
+                    case "REFUND": {
+                        Long amount = Long.parseLong(intent.getStringExtra("AMOUNT"));
                         String authorizationCode = intent.getStringExtra("AUTHORIZATION_CODE");
                         String operationNumber = intent.getStringExtra("OPERATION_NUMBER");
-                        Date saleDate = new SimpleDateFormat("ddMMyyyy", Locale.US).parse(intent.getStringExtra("SALE_DATE"));
+                        LocalDate saleDate = LocalDate.parse(intent.getStringExtra("SALE_DATE"), DateTimeFormatter.ofPattern("ddMMyyyy")).atStartOfDay().toLocalDate();
 
-                        if (EcoA10.refund(amount, operationNumber, authorizationCode, saleDate, this))
-                        {
+                        if (PaymentPOS.refund(amount, operationNumber, authorizationCode, kotlinx.datetime.LocalDate.Companion.parse(saleDate.toString()), this)) {
                             //ok
                         }
                         else
@@ -141,26 +136,21 @@ public class PerformTransactionActivity extends AppCompatActivity
     public void onTransactionRequestSignature(TransactionRequestSignatureInformation transactionRequestSignatureInformation)
     {
         Intent intent = new Intent(PerformTransactionActivity.this, SignatureActivity.class);
-        intent.putExtra("TRANSACTION_INFORMATION", transactionRequestSignatureInformation);
-		startActivityForResult(intent, REQUEST_SIGNATURE);
+        intent.putExtra("TRANSACTION_INFORMATION", Json.Default.encodeToString(TransactionRequestSignatureInformation.Companion.serializer(), transactionRequestSignatureInformation));
+        startActivityForResult(intent, REQUEST_SIGNATURE);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
-        switch(requestCode)
-        {
-            case REQUEST_SIGNATURE:
-            {
-                if(resultCode == RESULT_OK)
-                {
-                    BitmapSerializable bitmapSerializable = (BitmapSerializable) data.getSerializableExtra("SIGNATURE_BITMAP");
-                    EcoA10.returnTransactionRequestedSignature(bitmapSerializable.getBitmap());
-                }
-                else
-                {
-                    EcoA10.returnTransactionRequestedSignature(null);
+        switch (requestCode) {
+            case REQUEST_SIGNATURE: {
+                if (resultCode == RESULT_OK) {
+                    byte[] signatureBitmap = data.getByteArrayExtra("SIGNATURE_BITMAP");
+                    PaymentPOS.returnTransactionRequestedSignature(signatureBitmap);
+                } else {
+                    PaymentPOS.returnTransactionRequestedSignature(null);
                 }
             }
             break;
@@ -171,7 +161,7 @@ public class PerformTransactionActivity extends AppCompatActivity
     public void onTransactionComplete(TransactionResult transactionResult)
     {
         Intent intent = new Intent(this, TransactionCompleteActivity.class);
-        intent.putExtra("TRANSACTION_RESULT", transactionResult);
+        intent.putExtra("TRANSACTION_RESULT", Json.Default.encodeToString(TransactionResult.Companion.serializer(), transactionResult));
         startActivity(intent);
         finish();
     }
@@ -180,7 +170,7 @@ public class PerformTransactionActivity extends AppCompatActivity
     public void onTransactionError(Error error)
     {
         Intent intent = new Intent(this, TransactionErrorActivity.class);
-        intent.putExtra("TRANSACTION_ERROR", error);
+        intent.putExtra("TRANSACTION_ERROR", Json.Default.encodeToString(Error.Companion.serializer(), error));
         startActivity(intent);
         finish();
     }

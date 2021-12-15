@@ -13,7 +13,7 @@
         android:text="Transaction Accepted. Signature:"
         android:layout_weight="0"/>
 
-    <com.ecopaynet.ecoa10.SignatureView
+    <com.ecopaynet.module.paymentpos.SignatureView
         xmlns:signature="http://schemas.android.com/apk/res-auto"
         android:id="@+id/signatureView"
         android:layout_width="match_parent"

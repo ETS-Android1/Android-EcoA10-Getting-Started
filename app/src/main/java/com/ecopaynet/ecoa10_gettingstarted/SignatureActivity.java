@@ -3,13 +3,15 @@ package com.ecopaynet.ecoa10_gettingstarted;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import com.ecopaynet.ecoa10.BitmapSerializable;
-import com.ecopaynet.ecoa10.SignatureView;
-import com.ecopaynet.ecoa10.TransactionRequestSignatureInformation;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.ecopaynet.module.paymentpos.SignatureView;
+import com.ecopaynet.module.paymentpos.TransactionRequestSignatureInformation;
+
+import kotlinx.serialization.json.Json;
 
 public class SignatureActivity extends AppCompatActivity
 {
@@ -24,18 +26,16 @@ public class SignatureActivity extends AppCompatActivity
 
         signatureView = (SignatureView) findViewById(R.id.signatureView);
 
-        transactionRequestSignatureInformation = (TransactionRequestSignatureInformation) getIntent().getSerializableExtra("TRANSACTION_INFORMATION");
+        transactionRequestSignatureInformation = Json.Default.decodeFromString(TransactionRequestSignatureInformation.Companion.serializer(), getIntent().getStringExtra("TRANSACTION_INFORMATION"));
 
         Button signatureContinueButton = (Button) findViewById(R.id.signatureContinueButton);
         signatureContinueButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
-            public void onClick(View v)
-            {
-                Intent intent=new Intent();
+            public void onClick(View v) {
+                Intent intent = new Intent();
 
-                BitmapSerializable bitmapSerializable = new BitmapSerializable(signatureView.getSignatureBitmap());
-                intent.putExtra("SIGNATURE_BITMAP", bitmapSerializable);
+                intent.putExtra("SIGNATURE_BITMAP", signatureView.getSignatureBitmap());
 
                 setResult(Activity.RESULT_OK, intent);
                 finish();
