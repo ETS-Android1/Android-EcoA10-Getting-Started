@@ -1,4 +1,6 @@
-# Android EcoA10 Getting Started
+# DEPRECATED This is no longer supported, please consider using [PaymentPOS](https://github.com/ecopaynet/paymentpos-android) instead.
+
+## Android EcoA10 Getting Started
 An Android sample project to test the [EcoA10 library](https://github.com/ecopaynet/ecoa10-library-android).
 
 ## Introduction
