@@ -1,4 +1,5 @@
 # DEPRECATED This is no longer supported, please consider using [PaymentPOS](https://github.com/ecopaynet/paymentpos-android) instead.
+See [How to migrate to PaymentPOS](https://github.com/ecopaynet/Android-EcoA10-Getting-Started/tree/migrate-to-paymentpos)
 
 ## Android EcoA10 Getting Started
 An Android sample project to test the [EcoA10 library](https://github.com/ecopaynet/ecoa10-library-android).
