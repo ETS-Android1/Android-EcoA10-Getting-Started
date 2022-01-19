@@ -17,15 +17,17 @@
     1. From "com.ecopaynet.ecoa10.EcoA10" to "com.ecopaynet.module.paymentpos.PaymentPOS"
     2. From "com.ecopaynet.module.paymentpos.Status" to "com.ecopaynet.module.paymentpos.LibraryStatus"
     3. From "com.ecopaynet.module.paymentpos.EcoA10.getStatus()" to "com.ecopaynet.module.paymentpos.PaymentPOS.getLibraryStatus()"
+        - The values have been simplified
+    4. From "com.ecopaynet.module.paymentpos.TransactionReadingType" to "com.ecopaynet.module.paymentpos.ReadingType"
 6. Some classes have changed their proprety accessors from "myField" to "getMyField(). Change the way these properties are accessed.
 7. Other specific changes:
     - PaymentPOS.initialize()
-        - No longer needs to "Context".
+        - No longer needs the "Context".
     - PaymentPOS.sale(), refund(), etc.
         - Amount changed to "Long".
         - TransactionDate changed to "kotlinx.datetime.LocalDate".
     - PaymentPOS.resetConfiguration()
-        - No longer needs to "Context".
+        - No longer needs the "Context".
     - PaymentPOS.generateTransactionTicketsBMP()
         - Needs a second parameter with a header Bitmap. Can be null.
         - Returns a list of "Bitmap" instead of an array.
