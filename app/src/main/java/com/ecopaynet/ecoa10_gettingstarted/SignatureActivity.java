@@ -35,7 +35,7 @@ public class SignatureActivity extends AppCompatActivity
             public void onClick(View v) {
                 Intent intent = new Intent();
 
-                intent.putExtra("SIGNATURE_BITMAP", signatureView.getSignatureBitmap());
+                intent.putExtra("SIGNATURE_BITMAP", signatureView.getSignatureByteArray());
 
                 setResult(Activity.RESULT_OK, intent);
                 finish();

@@ -21,7 +21,6 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 import kotlinx.serialization.json.Json;
 
@@ -65,14 +64,22 @@ public class TransactionCompleteActivity extends AppCompatActivity
 
     private void fillTransactionResult() {
         try {
-            List<Bitmap> tickets = PaymentPOS.generateTransactionTicketsBMP(transactionResult, null);
-
-            Bitmap commerceTicketWithBorder = addBorder(tickets.get(0), Color.BLACK, 2);
-            transactionResultImageView.setImageBitmap(commerceTicketWithBorder);
+            Bitmap ticketWithBorder = null;
+            Bitmap commerceTicket = PaymentPOS.generateCommerceTransactionTicketBMP(transactionResult, null);
+            if(commerceTicket != null) {
+                ticketWithBorder = addBorder(commerceTicket, Color.BLACK, 2);
+            } else {
+                Bitmap cardholderTicket = PaymentPOS.generateCardholderTransactionTicketBMP(transactionResult, null);
+                if(cardholderTicket != null) {
+                    ticketWithBorder = addBorder(cardholderTicket, Color.BLACK, 2);
+                }
+            }
+            if(ticketWithBorder != null) {
+                transactionResultImageView.setImageBitmap(ticketWithBorder);
+            }
         }
         catch (Exception ex)
         {
-
         }
     }
 
@@ -87,17 +94,20 @@ public class TransactionCompleteActivity extends AppCompatActivity
     @TargetApi(19)
     private void saveTicketsPDF() {
         try {
-            List<PdfDocument> tickets = PaymentPOS.generateTransactionTicketsPDF(transactionResult, null);
-
-            File tracesFolder = new File(Environment.getExternalStorageDirectory(), "/EcoA10/Tickets");
-            if (!tracesFolder.exists())
-                tracesFolder.mkdirs();
-
+            File ticketsFolder = new File(Environment.getExternalStorageDirectory(), "/EcoA10/Tickets");
+            if (!ticketsFolder.exists()) ticketsFolder.mkdirs();
             String fileDateTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
 
-            for (int i = 0; i < tickets.size(); i++) {
-                String fileName = Environment.getExternalStorageDirectory() + "/EcoA10/Tickets/" + fileDateTime + ((i == 0) ? "" : "_CC") + ".pdf";
-                tickets.get(i).writeTo(new FileOutputStream(fileName, false));
+            PdfDocument commerceTicket = PaymentPOS.generateCommerceTransactionTicketPDF(transactionResult, null);
+            if(commerceTicket != null) {
+                String commerceTicketFilename = Environment.getExternalStorageDirectory() + "/EcoA10/Tickets/" + fileDateTime + ".pdf";
+                commerceTicket.writeTo(new FileOutputStream(commerceTicketFilename, false));
+            }
+
+            PdfDocument cardholderTicket = PaymentPOS.generateCardholderTransactionTicketPDF(transactionResult, null);
+            if(cardholderTicket != null) {
+                String cardholderTicketFilename = Environment.getExternalStorageDirectory() + "/EcoA10/Tickets/" + fileDateTime + "_CC.pdf";
+                cardholderTicket.writeTo(new FileOutputStream(cardholderTicketFilename, false));
             }
         }
         catch(Exception ex)
@@ -107,23 +117,34 @@ public class TransactionCompleteActivity extends AppCompatActivity
 
     private void saveTicketsImage() {
         try {
-            List<Bitmap> tickets = PaymentPOS.generateTransactionTicketsBMP(transactionResult, null);
-
-            File tracesFolder = new File(Environment.getExternalStorageDirectory(), "/EcoA10/Tickets");
-            if (!tracesFolder.exists())
-                tracesFolder.mkdirs();
-
+            File ticketsFolder = new File(Environment.getExternalStorageDirectory(), "/EcoA10/Tickets");
+            if (!ticketsFolder.exists()) ticketsFolder.mkdirs();
             String fileDateTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
 
-            for (int i = 0; i < tickets.size(); i++) {
-                String fileName = Environment.getExternalStorageDirectory() + "/EcoA10/Tickets/" + fileDateTime + ((i == 0) ? "" : "_CC") + ".png";
-                OutputStream out = new FileOutputStream(fileName, false);
-                tickets.get(i).compress(Bitmap.CompressFormat.PNG, 100, out);
-                out.close();
+            Bitmap commerceTicket = PaymentPOS.generateCommerceTransactionTicketBMP(transactionResult, null);
+            if(commerceTicket != null) {
+                String commerceTicketFilename = Environment.getExternalStorageDirectory() + "/EcoA10/Tickets/" + fileDateTime + ".png";
+                saveTicketImage(commerceTicket, commerceTicketFilename);
+            }
+
+            Bitmap cardholderTicket = PaymentPOS.generateCardholderTransactionTicketBMP(transactionResult, null);
+            if(cardholderTicket != null) {
+                String cardholderTicketFilename = Environment.getExternalStorageDirectory() + "/EcoA10/Tickets/" + fileDateTime + "_CC.png";
+                saveTicketImage(cardholderTicket, cardholderTicketFilename);
             }
         }
         catch(Exception ex)
         {
+        }
+    }
+
+    private void saveTicketImage(Bitmap ticketBitmap, String filename) {
+        try {
+            OutputStream out = new FileOutputStream(filename, false);
+            ticketBitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+            out.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

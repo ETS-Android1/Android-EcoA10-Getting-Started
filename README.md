@@ -28,12 +28,9 @@
         - TransactionDate changed to "kotlinx.datetime.LocalDate".
     - PaymentPOS.resetConfiguration()
         - No longer needs the "Context".
-    - PaymentPOS.generateTransactionTicketsBMP()
-        - Needs a second parameter with a header Bitmap. Can be null.
-        - Returns a list of "Bitmap" instead of an array.
-    - PaymentPOS.generateTransactionTicketsPDF()
-        - Needs a second parameter with a header Bitmap. Can be null.
-        - Returns a list of "PdfDocument" instead of an array.
+    - PaymentPOS.generateTransactionTickets*
+        - Methods has been moved into two methods: one for the commerce ticket and other for the cardholder ticket. (e.g. PaymentPOS.generateCommerceTransactionTicketBMP and PaymentPOS.generateCardholderTransactionTicketBMP)
+        - For BMP and PDF formats, needs a second parameter with a header Bitmap. Can be null.
     - TransactionResult:
         - signatureBitmap changed to byte[]
     - SignatureView:
